@@ -462,7 +462,7 @@ const userControllers = {
     }
   },
 
-  // [ ]  forget password  [ ]
+  // [+]  forget password  [+]
   async forgetPassword(req, res, next) {
     try {
       const user = await User.findById(req.__auth.id);
@@ -506,7 +506,7 @@ const userControllers = {
     }
   },
 
-  // [ ] resetPassword [ ]
+  // [+] resetPassword [+]
   async resetPassword(req, res, next) {
     const { userId, token } = req.params;
     const { password } = req.body;
