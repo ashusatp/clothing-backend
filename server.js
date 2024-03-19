@@ -28,6 +28,8 @@ app.use(
 
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/admin", adminRoutes);
+const userRoutes = require("./routes/userRoutes");
+app.use("/user", userRoutes);
 
 app.use(errorHandler);
 app.listen(PORT, () => {

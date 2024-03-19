@@ -50,12 +50,11 @@ router.delete("/stock/:productId/:stockId", stockControllers.deleteStock);
 router.post("/stock-add-img/:id", singleUpload, stockControllers.addImage);
 router.put("/stock-remove-img/:imgId/:stockId", stockControllers.removeImage);
 
-//[ ] Offer Routes [ ]
+//[+] Offer Routes [+]
 router.post('/offer' , offerControllers.createOffer);
 router.put('/offer/:id', offerControllers.updateOffer);
 router.delete('/offer/:id', offerControllers.deleteOffer);
 router.put('/add-offer/:prodId/:id', offerControllers.addOffer);
 router.put('/remove-offer/:prodId/:id' ,offerControllers.removeProductOffer);
-
 
 module.exports = router;

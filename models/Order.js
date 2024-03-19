@@ -9,7 +9,7 @@ const OrderSchema = new Schema({
 
   order_items: [{
       product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-      stock: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+      stock: { type: mongoose.Schema.Types.ObjectId, ref: "Stock" },
       quantity: Number,
   }],
 
@@ -17,7 +17,6 @@ const OrderSchema = new Schema({
   total_amount: Number,
   
   coupon_used: { type: mongoose.Schema.Types.Mixed, ref: "Coupon" }, // on over all order.
-  offer_used: [{ type: mongoose.Schema.Types.Mixed, ref: "Offer" }], // on each product.
   created_at: { type: Date, default: Date.now() },
   modified_at: { type: Date, default: Date.now() },
   transcation_id: {

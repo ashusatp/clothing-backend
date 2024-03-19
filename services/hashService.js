@@ -1,5 +1,4 @@
 const crypto = require("crypto");
-// crypto.randomBytes(64).toString('hex')
 class HashService {
   hashPassword(data) {
     return crypto

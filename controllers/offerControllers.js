@@ -74,7 +74,7 @@ const offerControllers = {
 
       if (product.offers.length !== 0) {
         return next(
-          CustomErrorHandler.alreadyExist("This product already have One offer")
+          CustomErrorHandler.alreadyExist("This product already has one offer")
         );
       }
 
