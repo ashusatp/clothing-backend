@@ -4,6 +4,21 @@ const Stock = require("../models/Stock");
 const CustomErrorHandler = require("../services/CustomErrorHandler");
 
 const offerControllers = {
+  // [+] display all offers [+]
+  async getOffers(req, res, next) {
+    try {
+      const offers = await Offer.find();
+      res.status(201).json({
+        status: "success",
+        data: {
+          offers: offers,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   //[+] create Offer [+]
   async createOffer(req, res, next) {
     const { discount, title, description, end_at } = req.body;
@@ -15,7 +30,7 @@ const offerControllers = {
         discount: Number(discount),
         title,
         description,
-        end_at,
+        end_at: new Date(end_at),
       });
 
       res.status(201).json({
@@ -42,7 +57,7 @@ const offerControllers = {
 
       offer.title = title;
       offer.description = description;
-      offer.end_at = end_at;
+      offer.end_at = new Date(end_at);
 
       await offer.save();
 
@@ -91,7 +106,8 @@ const offerControllers = {
         const stock = await Stock.findById(stockId);
         let amount = stock.amount;
         let discountamount = (amount / 100) * Number(offer.discount);
-        amount -= discountamount;
+        const ceilingValue = Math.ceil(discountamount);
+        amount -= ceilingValue;
         stock.afterOffer = amount;
         await stock.save();
       });
@@ -99,7 +115,6 @@ const offerControllers = {
 
       await product.save();
       await offer.save();
-
       res.status(201).json({
         status: "success",
         message: `Offer is applied on ${product.title}`,
@@ -189,7 +204,6 @@ const offerControllers = {
       next(error);
     }
   },
-
 
   //[+] delete Offer [+]
   async deleteOffer(req, res, next) {

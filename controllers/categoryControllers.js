@@ -3,6 +3,23 @@ const Product = require("../models/Product");
 const CustomErrorHandler = require("../services/CustomErrorHandler");
 
 const categoryControllers = {
+  async getCategories(req,res,next){
+    try {
+      const categories = await Category.find();
+      if (!categories) {
+        return next(CustomErrorHandler.notFound("categories not found"));
+      }
+      res.status(200).json({
+        status: "success",
+        data: {
+          categories: categories,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async createCategory(req, res, next) {
     const { category } = req.body;
     if (!category) {

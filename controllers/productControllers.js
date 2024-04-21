@@ -7,6 +7,24 @@ const Image = require("../models/Image");
 const Category = require("../models/Category");
 const Brand = require("../models/Brand");
 const productControllers = {
+  // [ ] get Products [ ]
+  async getProducts(req, res, next) {
+    try {
+      const products = await Product.find().populate("image");
+      if (!products) {
+        return next(CustomErrorHandler.notFound("Product not found"));
+      }
+      res.status(200).json({
+        status: "success",
+        data: {
+          products: products,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   //[+] get product by Id [+]
   async getProduct(req, res, next) {
     const { id } = req.params;
@@ -14,7 +32,18 @@ const productControllers = {
       return next(CustomErrorHandler.missingFields());
     }
     try {
-      const product = await Product.findById(id);
+      const product = await Product.findById(id)
+        .populate("image") // Populate the image field directly under the product document
+        .populate("categories") // Populate the categories field
+        .populate("offers") // Populate the categories field
+        .populate({
+          path: "brands",
+          populate: {
+            path: "image", // Populate the image field within the brands documents
+          },
+        })
+        .exec();
+
       if (!product) {
         return next(CustomErrorHandler.notFound("Product not found"));
       }
@@ -22,6 +51,27 @@ const productControllers = {
         status: "success",
         data: {
           product: product,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getProductStocks(req, res, next) {
+    const { id } = req.params;
+    if (!id) {
+      return next(CustomErrorHandler.missingFields());
+    }
+    try {
+      const stocks = await Stock.find({ product: id }).populate("images");
+      if (!stocks) {
+        return next(CustomErrorHandler.notFound("stocks not found"));
+      }
+      res.status(200).json({
+        status: "success",
+        data: {
+          stocks: stocks,
         },
       });
     } catch (error) {
@@ -142,16 +192,16 @@ const productControllers = {
   // [+] Add Brand [+]
   async addBrand(req, res, next) {
     const { productId, brandId } = req.params;
+
     if (!productId || !brandId) {
       return next(CustomErrorHandler.missingFields());
     }
+
     try {
       const brand = await Brand.findById(brandId);
-
       if (!brand) {
         return next(CustomErrorHandler.notFound());
       }
-
       const updatedProduct = await Product.updateOne(
         { _id: productId },
         { $addToSet: { brands: brandId } }
@@ -168,6 +218,7 @@ const productControllers = {
         message: "Brand added successfully",
       });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   },
@@ -193,9 +244,7 @@ const productControllers = {
         updatedProduct.modifiedCount === 0 ||
         updatedBrand.modifiedCount === 0
       ) {
-        return next(
-          CustomErrorHandler.notFound("Product or brand not found")
-        );
+        return next(CustomErrorHandler.notFound("Product or brand not found"));
       }
 
       res.status(201).json({

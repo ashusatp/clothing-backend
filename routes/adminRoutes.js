@@ -9,11 +9,13 @@ const router = express.Router();
 
 //[+] category Routes [+]
 router.post("/category", categoryControllers.createCategory);
+router.get("/category", categoryControllers.getCategories);
 router.put("/category/:id", categoryControllers.updateCategory);
 router.delete("/category/:id", categoryControllers.deleteCategory);
 
 // [+] Brand Routes [+]
 router.post("/brand", singleUpload, brandControllers.createBrand);
+router.get("/brand", brandControllers.getBrands);
 router.put("/brand/:id", brandControllers.updateBrand);
 router.put(
   "/brand-img/:imgId",
@@ -24,6 +26,8 @@ router.delete("/brand/:id", brandControllers.deleteBrand);
 
 // [ ] product Routes [ ]
 router.get("/product/:id", productControllers.getProduct);
+router.get("/product-stocks/:id", productControllers.getProductStocks);
+router.get("/products", productControllers.getProducts);
 router.post("/product", singleUpload, productControllers.createProduct);
 router.put(
   "/product-add-cat/:productId/:catId",
@@ -51,6 +55,7 @@ router.post("/stock-add-img/:id", singleUpload, stockControllers.addImage);
 router.put("/stock-remove-img/:imgId/:stockId", stockControllers.removeImage);
 
 //[+] Offer Routes [+]
+router.get('/offer' , offerControllers.getOffers);
 router.post('/offer' , offerControllers.createOffer);
 router.put('/offer/:id', offerControllers.updateOffer);
 router.delete('/offer/:id', offerControllers.deleteOffer);

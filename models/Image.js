@@ -5,7 +5,7 @@ const imageSchema = new Schema(
     public_id: {
       type: String,
       required: true,
-      unique: true
+      // unique: true
     },
     url: {
       type: String,

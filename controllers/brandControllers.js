@@ -5,6 +5,22 @@ const CustomErrorHandler = require("../services/CustomErrorHandler");
 const getDataUri = require("../services/getDatauri");
 const cloudinary = require("cloudinary");
 const brandControllers = {
+  async getBrands(req,res,next){
+    try {
+      const brands = await Brand.find().populate("image");
+      if (!brands) {
+        return next(CustomErrorHandler.notFound("Product not found"));
+      }
+      res.status(200).json({
+        status: "success",
+        data: {
+          brands: brands,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
   async createBrand(req, res, next) {
     const { brand } = req.body;
     const file = req.file;

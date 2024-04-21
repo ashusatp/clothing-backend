@@ -7,8 +7,8 @@ const productSchema = new Schema({
   brands: [{ type: Schema.Types.ObjectId, ref: "Brand" }],
   stocks: [{ type: Schema.Types.ObjectId, ref: "Stock" }],
   rating: { type: Number, default: 0 },
-  image: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-  offers: [{ type: Schema.Types.ObjectId, red: "Offer" }],
+  image: { type: Schema.Types.ObjectId, ref: "Image" },
+  offers: [{ type: Schema.Types.ObjectId, ref: "Offer" }],
   created_at: { type: Date, default: Date.now() },
   modified_at: { type: Date, default: Date.now() },
 });
