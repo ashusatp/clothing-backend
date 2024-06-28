@@ -4,9 +4,27 @@ const CustomErrorHandler = require("../services/CustomErrorHandler");
 
 const addressControllers = {
   async addAddress(req, res, next) {
-    const { id } = req.params;
-    const { firstLine, secondLine, pincode, city, state } = req.body;
-    if (!firstLine || !secondLine || !pincode || !city || !state) {
+    const id  = req.__auth.id;
+    const {
+      name,
+      flatHouseNumber,
+      areaStreet,
+      landmark,
+      pincode,
+      city,
+      mobileNumber,
+      state,
+    } = req.body;
+    if (
+      !name ||
+      !flatHouseNumber ||
+      !areaStreet ||
+      !landmark ||
+      !mobileNumber ||
+      !pincode ||
+      !city ||
+      !state
+    ) {
       return next(CustomErrorHandler.missingFields());
     }
     try {
@@ -15,10 +33,13 @@ const addressControllers = {
       const address = await Address.create({
         user: user._id,
         address: {
-          firstLine,
-          secondLine,
-          pincode: Number(pincode),
+          name,
+          flatHouseNumber,
+          areaStreet,
+          landmark,
+          pincode,
           city,
+          mobileNumber,
           state,
         },
       });
@@ -37,9 +58,9 @@ const addressControllers = {
   },
 
   async getAddresses(req, res, next) {
-    const { id } = req.params;
+    const id  = req.__auth.id;
     try {
-      const user = await User.findById(id).populate('savedAddress');
+      const user = await User.findById(id).populate("savedAddress");
       if (!user) return next(CustomErrorHandler.notFound("User not found"));
       res.status(200).json({
         success: true,
@@ -51,7 +72,9 @@ const addressControllers = {
   },
 
   async removeAddress(req, res, next) {
-    const { id, addId } = req.params;
+    const { addId } = req.params;
+    const id = req.__auth.id;
+    console.log(addId);
     try {
       const updatedUser = await User.updateOne(
         { _id: id },

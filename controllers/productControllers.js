@@ -6,19 +6,72 @@ const getDataUri = require("../services/getDatauri");
 const Image = require("../models/Image");
 const Category = require("../models/Category");
 const Brand = require("../models/Brand");
+
+const findMinimumStock = (stocks) => {
+  return stocks.reduce((min, stock) => {
+    // Initially, min is the first item, then it compares to see if the current stock has a lower quantity
+    if (!min || stock.quantity < min.quantity) {
+      return {
+        minimumQuantity: stock.quantity,
+        price: stock.amount,
+        size: stock.size, // Including size to show more info about the item
+      };
+    }
+    return min;
+  }, null); // Starting with null as the initial value
+};
+
 const productControllers = {
-  // [ ] get Products [ ]
+  // [+] get Products [+]
   async getProducts(req, res, next) {
+    const { category } = req.body;
     try {
-      const products = await Product.find().populate("image");
-      if (!products) {
-        return next(CustomErrorHandler.notFound("Product not found"));
+      let products = [];
+      if (category) {
+        // Find the category IDs that match the category name
+        const categories = await Category.find({
+          category: { $regex: category, $options: "i" },
+        });
+        const categoryIds = categories.map((cat) => cat._id);
+
+        // Now find products that have these category IDs in their categories array
+        products = await Product.find({
+          categories: { $in: categoryIds },
+        }).populate("image brands stocks");
+
+        // console.log(minimumStock);
+      } else {
+        // If no category is specified, return all products
+        products = await Product.find().populate("image brands stocks");
       }
+
       res.status(200).json({
         status: "success",
         data: {
-          products: products,
+          products,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // [ ] Product Search [ ]
+  async getProductsSearchs(req, res, next) {
+    const { titleQuery } = req.body;
+    try {
+      // Escape special regex characters
+      const escapedQuery = titleQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      // Create a regex pattern to match the titleQuery anywhere in the title, case-insensitive
+      const regexPattern = new RegExp(escapedQuery, "i");
+
+      const products = await Product.find({
+        title: { $regex: regexPattern },
+      }).populate("image");
+
+      res.status(200).json({
+        status: "success",
+        products,
       });
     } catch (error) {
       next(error);
@@ -42,16 +95,26 @@ const productControllers = {
             path: "image", // Populate the image field within the brands documents
           },
         })
+        .populate({
+          path: "stocks",
+          populate: {
+            path: "images", // Populate the image field within the brands documents
+          },
+        })
         .exec();
 
       if (!product) {
         return next(CustomErrorHandler.notFound("Product not found"));
       }
+
+      const sizes = await Stock.distinct('size', { product: id });
+      const colors = await Stock.distinct('color', { product: id });
+
       res.status(200).json({
         status: "success",
-        data: {
-          product: product,
-        },
+        product: product,
+        sizes,
+        colors,
       });
     } catch (error) {
       next(error);
@@ -117,6 +180,7 @@ const productControllers = {
         },
       });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   },

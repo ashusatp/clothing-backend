@@ -16,7 +16,7 @@ const resetPasswordSchema = new Schema({
 
   createdAt: {
     type: Date,
-    expires: 3600,
+    expires:300,
     default: () => Date.now(),
   },
 });

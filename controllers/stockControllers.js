@@ -14,7 +14,7 @@ const stockControllers = {
       return next(CustomErrorHandler.missingFields());
     }
     try {
-      const stock = await Stock.findById(id);
+      const stock = await Stock.findById(id).populate("images");
       if (!stock) {
         return next(CustomErrorHandler.notFound("Stock not found"));
       }
@@ -29,6 +29,68 @@ const stockControllers = {
       next(error);
     }
   },
+  async getStockWithColor(req, res, next) {
+    const { prodId } = req.params;
+    const { color } = req.body;
+    if (!prodId || !color) {
+      return next(CustomErrorHandler.missingFields());
+    }
+    try {
+      const sizes = await Stock.distinct("size", {
+        product: prodId,
+        color: color,
+      });
+      res.status(201).json({
+        status: "success",
+        sizes,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  async getStockWithSize(req, res, next) {
+    const { prodId } = req.params;
+    const { size } = req.body;
+    if (!size || !prodId) {
+      return next(CustomErrorHandler.missingFields());
+    }
+    try {
+      const colors = await Stock.distinct("color", {
+        product: prodId,
+        size: size,
+      });
+      res.status(201).json({
+        status: "success",
+        colors,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  async getStockWithColorAndSize(req, res, next) {
+    const { prodId } = req.params;
+    const { color, size } = req.body;
+    if (!color || !size) {
+      return next(CustomErrorHandler.missingFields());
+    }
+    try {
+      const stock = await Stock.find({
+        color: color,
+        size: size,
+        product: prodId,
+      }).populate("images");
+      if (!stock) {
+        return next(CustomErrorHandler.notFound("Stock not found"));
+      }
+
+      res.status(201).json({
+        status: "success",
+        stock,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
   //[+] create stocks [+]
   async createStock(req, res, next) {
     const { id } = req.params;
@@ -38,6 +100,13 @@ const stockControllers = {
       return next(CustomErrorHandler.missingFields());
     }
     try {
+      const isstockExist = await Stock.find({
+        color: color,
+        size: size,
+        product: prodId,
+      });
+      if (isstockExist) return next(CustomErrorHandler.alreadyExist("Stock already exist"));
+      
       const product = await Product.findById(id);
       if (!product) {
         return next(

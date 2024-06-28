@@ -375,7 +375,7 @@ const userControllers = {
       }
 
       mailTransport.sendMail({
-        from: "varification12@gmai.com",
+        from: "support1234@dayumstore.in",
         to: user.email,
         subject: "Email Verification",
         html: generateVerficationEmail(user.fname + " " + user.lname, otp),
@@ -464,29 +464,41 @@ const userControllers = {
 
   // [+]  forget password  [+]
   async forgetPassword(req, res, next) {
+    const { email } = req.body;
     try {
-      const user = await User.findById(req.__auth.id);
+      const user = await User.findOne({ email: email });
       if (!user) {
         return next(CustomErrorHandler.unAuthorized());
       }
 
       const existToken = await ResetPassword.findOne({ user: user._id });
-      if (existToken) {
-        return next(
-          CustomErrorHandler.alreadyExist(
-            "You have recently updated your password. Please try after 1 minute."
-          )
-        );
-      }
+      // if (existToken) {
+      //   return next(
+      //     CustomErrorHandler.alreadyExist(
+      //       "You have recently updated your password. Please try after 1 minute."
+      //     )
+      //   );
+      // }
+      // const token = await randomBytes;
+      // await ResetPassword.create({
+      //   user: user._id,
+      //   token,
+      // });
 
       const token = await randomBytes;
-      await ResetPassword.create({
-        user: user._id,
-        token,
-      });
+      if (existToken) {
+        existToken.token = token;
+        existToken.createdAt = new Date();
+        await existToken.save();
+      } else {
+        await ResetPassword.create({
+          user: user._id,
+          token,
+        });
+      }
 
       mailTransport.sendMail({
-        from: "security12@gmai.com",
+        from: "support1234@dayumstore.in",
         to: user.email,
         subject: "Reset Password",
         html: generateResetPassEmail(
